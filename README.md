@@ -1,4 +1,4 @@
-# Web Wanderer - Multi-Threaded Web Crawler
+# Web Wanderer
 
 Web Wanderer is a multi-threaded web crawler written in Python, utilizing `concurrent.futures.ThreadPoolExecutor` and Playwright to efficiently crawl and download web pages. This web crawler is designed to handle dynamically rendered websites, making it capable of extracting content from modern web applications.
 
