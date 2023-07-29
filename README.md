@@ -6,6 +6,18 @@ Web Wanderer is a multi-threaded web crawler written in Python, utilizing `concu
 
 ## How to Use
 
+First install the [required dependencies](#dependencies).
+
+Then you can use it as either a cli tool or as a library.
+
+### 1. As command-line interface
+
+```bash
+python src/main.py https://python.langchain.com/en/latest/
+```
+
+### 2. As a Library
+
 To start crawling, simply instantiate the `MultithreadedCrawler` class with the seed URL and optional parameters:
 
 ```python
