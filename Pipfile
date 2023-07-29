@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 playwright = "*"
+validators = "*"
 
 [dev-packages]
 
