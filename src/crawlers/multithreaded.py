@@ -66,14 +66,16 @@ class MultithreadedCrawler(Crawler):
         except Exception as e:
             self.logger.critical(f"start error: {e}")
         finally:
-            print(
-                f"downloaded {len(self.metadata['successful'])} pages in {round(time.time() - start_time, 2)} seconds\n"
-                f"downloads saved to '{self.output_dir}'\n"
-                f"failed to crawl {len(self.failed_urls)} URLs"
+            self.logger.info(
+                f"downloaded {len(self.metadata['successful'])} pages to '{self.output_dir}' pages in {round(time.time() - start_time, 2)} seconds"
             )
+
+            if (len(self.failed_urls)) > 0:
+                self.logger.warn(f"failed to crawl {len(self.failed_urls)} URLs")
 
             self.metadata["failed"] = list(self.failed_urls)
 
+            # save the metadata as a JSON file
             with open(os.path.join(self.output_dir, "metadata.json"), "w") as json_file:
                 json.dump(self.metadata, json_file, indent=2)
 
@@ -155,7 +157,7 @@ class MultithreadedCrawler(Crawler):
                     self.url_queue.put(href)
                     count += 1
 
-                self.logger.info(
+                self.logger.debug(
                     f"{current_url} -> found {len(links)} <a> tags, to crawl {count} URLs"
                 )
             except Exception as e:

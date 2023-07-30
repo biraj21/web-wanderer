@@ -64,7 +64,7 @@ class Crawler:
         """
 
         logger = logging.getLogger(self.__class__.__name__)
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.DEBUG)
 
         # create console handler
         ch = logging.StreamHandler(sys.stdout)
