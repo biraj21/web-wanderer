@@ -57,6 +57,10 @@ class MultithreadedCrawler(Crawler):
                     # queue maybe empty right now but it may get more URLs from the running threads
                     if self.url_queue.empty():
                         while any(future.running() for future in futures):
+                            # stop blocking if url_queue isn't empty anymore
+                            if not self.url_queue.empty():
+                                break
+
                             continue
                         else:
                             futures.clear()
