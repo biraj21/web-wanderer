@@ -81,13 +81,12 @@ class MultithreadedCrawler(Crawler):
 
     # function to crawl a URL
     def crawl(self, url: str):
-        cleaned_url = get_cleaned_url(url)
-        if cleaned_url is None:
+        url = get_cleaned_url(url)
+        if url is None:
             raise ValueError(f"invalid URL '{url}' somehow reached crawl method")
 
         current_url = url
-
-        self.logger.info(f"crawling {url}")
+        self.logger.info(f"crawling {current_url}")
 
         # launch the Chrome browser in headless mode
         with sync_playwright() as p:
