@@ -7,7 +7,7 @@ from typing import Callable, Dict, List, Optional
 
 import validators
 
-from utils.url import get_base_url, get_filename
+from utils.url import get_base_url, get_cleaned_url, get_filename
 
 # where to store the downloaded pages by default
 DEFAULT_OUTPUT_DIR = os.path.join("web-wanderer", "downloads")
@@ -24,7 +24,7 @@ class Crawler:
             raise ValueError(f"invalid seed_url '{seed_url}'")
 
         # the url to start crawling from
-        self.seed_url = seed_url
+        self.seed_url = get_cleaned_url(seed_url)
 
         # the base url of the seed
         self.base_url = get_base_url(seed_url)
@@ -45,6 +45,9 @@ class Crawler:
 
         # set of URLs that weren't crawled successfully
         self.failed_urls = set()
+
+        # set of URLs that are already distributed to a worker
+        self.distrubuted_urls = set()
 
         # a callback function that will be called after crawling is SUCCESSFULLY done
         self.done_callback = done_callback
@@ -78,3 +81,22 @@ class Crawler:
 
     def start(self):
         raise NotImplementedError
+
+    def should_crawl(self, url: str):
+        """
+        Returns True if the given URL
+            - starts with seed_url
+            - AND NOT already distrubuted
+            - AND NOT already crawled
+            - AND NOT failed\n
+        else False.
+        """
+
+        url = get_cleaned_url(url)
+
+        return (
+            url.startswith(self.seed_url)
+            and url not in self.distrubuted_urls
+            and url not in self.crawled_urls
+            and url not in self.failed_urls
+        )

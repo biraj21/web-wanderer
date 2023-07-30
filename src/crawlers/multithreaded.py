@@ -31,31 +31,28 @@ class MultithreadedCrawler(Crawler):
         # number of threads this crawler should use
         self.num_threads = num_threads
 
-        # set of URLs that are already distributed to a worker
-        self.distrubuted_urls = set()
-
     # method to initiate crawling
     def start(self):
+        start_time = time.time()
+
         try:
             self.url_queue.put(self.seed_url)
-
-            start_time = time.time()
 
             with ThreadPoolExecutor(max_workers=self.num_threads) as executor:
                 futures = set()
                 while not self.url_queue.empty():
                     url = self.url_queue.get()
 
-                    # skip this URL is it's already distributed or crawling failed
-                    if url in self.distrubuted_urls or url in self.failed_urls:
+                    # skip this URL is it's already distributed, crawled or failed
+                    if not self.should_crawl(url):
                         continue
+
+                    # mark this URL as distributed
+                    self.distrubuted_urls.add(url)
 
                     # sechedule the crawl method for this URL
                     future = executor.submit(self.crawl, url)
                     futures.add(future)
-
-                    # mark this URL as distributed
-                    self.distrubuted_urls.add(url)
 
                     # queue maybe empty right now but it may get more URLs from the running threads
                     if self.url_queue.empty():
@@ -82,14 +79,11 @@ class MultithreadedCrawler(Crawler):
 
     # function to crawl a URL
     def crawl(self, url: str):
-        url = add_base_url(url, base_url=self.base_url)
-        current_url = url
+        cleaned_url = get_cleaned_url(url)
+        if cleaned_url is None:
+            raise ValueError(f"invalid URL '{url}' somehow reached crawl method")
 
-        if (
-            not url.startswith(self.seed_url)
-            or get_cleaned_url(url) in self.crawled_urls
-        ):
-            return
+        current_url = url
 
         self.logger.info(f"crawling {url}")
 
@@ -110,17 +104,15 @@ class MultithreadedCrawler(Crawler):
                 # in case of redirects, current URL would be different from the given URL
                 current_url = get_cleaned_url(page.url)
 
+                # if it is redirected, then first check if it should be crawled or not
+                if url != current_url and not self.should_crawl(current_url):
+                    return
+
                 # if the seed URL itself redirects to some other page, then handle that
                 if url == self.seed_url and current_url != self.seed_url:
                     self.seed_url = get_base_url(current_url)
                     self.base_url = get_base_url(current_url)
                     self.distrubuted_urls.add(current_url)
-
-                if (
-                    not current_url.startswith(self.seed_url)
-                    or current_url in self.crawled_urls
-                ):
-                    return
 
                 # save the rendered HTML to a file
                 html = page.inner_html("html")
@@ -154,12 +146,8 @@ class MultithreadedCrawler(Crawler):
 
                 hrefs.discard(None)
 
-                # filter out URLs that do not start with seed url or have already been crawled
-                hrefs = filter(
-                    lambda href: href.startswith(self.seed_url)
-                    and href not in self.crawled_urls,
-                    hrefs,
-                )
+                # filter out URLs that should't be crawled
+                hrefs = filter(lambda href: self.should_crawl(href), hrefs)
 
                 count = 0
                 # add new URLs to the queue for crawling
