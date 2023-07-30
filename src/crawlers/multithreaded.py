@@ -75,7 +75,7 @@ class MultithreadedCrawler(Crawler):
             )
 
             if (len(self.failed_urls)) > 0:
-                self.logger.warn(f"failed to crawl {len(self.failed_urls)} URLs")
+                self.logger.warning(f"failed to crawl {len(self.failed_urls)} URLs")
 
             self.metadata["failed"] = list(self.failed_urls)
 
@@ -99,12 +99,20 @@ class MultithreadedCrawler(Crawler):
                 page = browser.new_page()
 
                 try:
-                    page.goto(url)
+                    response = page.goto(url)
                     page.wait_for_load_state("networkidle", timeout=PAGE_WAIT_TIMEOUT)
                 except TimeoutError:
                     self.logger.warning(
                         f"{current_url} timeout - using whatever's rendered"
                     )
+
+                if response.status >= 400:
+                    self.failed_urls.add(current_url)
+                    self.failed_urls.add(url)
+                    self.logger.warning(
+                        f"skipping {current_url} as response status {response.status}"
+                    )
+                    return
 
                 # in case of redirects, current URL would be different from the given URL
                 current_url = get_cleaned_url(page.url)
