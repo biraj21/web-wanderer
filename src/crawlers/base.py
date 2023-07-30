@@ -3,7 +3,7 @@ import os
 from queue import Queue
 import sys
 
-from typing import Callable, Optional
+from typing import Callable, Dict, List, Optional
 
 import validators
 
@@ -51,6 +51,9 @@ class Crawler:
 
         # instantiate a Logger for this class
         self.logger = self.get_logger()
+
+        # a JSON array of metadata [{"url": "<URL>", "filename": "<FILENAME>"}]
+        self.metadata: Dict = {"successful": [], "failed": []}
 
     def get_logger(self):
         """

@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+import json
 import os
 import time
 
@@ -69,10 +70,15 @@ class MultithreadedCrawler(Crawler):
             self.logger.critical(f"start error: {e}")
         finally:
             print(
-                f"downloaded {len(os.listdir(self.output_dir))} pages in {round(time.time() - start_time, 2)} seconds\n"
+                f"downloaded {len(self.metadata['successful'])} pages in {round(time.time() - start_time, 2)} seconds\n"
                 f"downloads saved to '{self.output_dir}'\n"
                 f"failed to crawl {len(self.failed_urls)} URLs"
             )
+
+            self.metadata["failed"] = list(self.failed_urls)
+
+            with open(os.path.join(self.output_dir, "metadata.json"), "w") as json_file:
+                json.dump(self.metadata, json_file, indent=2)
 
     # function to crawl a URL
     def crawl(self, url: str):
@@ -108,6 +114,7 @@ class MultithreadedCrawler(Crawler):
                 if url == self.seed_url and current_url != self.seed_url:
                     self.seed_url = get_base_url(current_url)
                     self.base_url = get_base_url(current_url)
+                    self.distrubuted_urls.add(current_url)
 
                 if (
                     not current_url.startswith(self.seed_url)
@@ -128,6 +135,11 @@ class MultithreadedCrawler(Crawler):
                 # mark both current & redirected URLs as crawled
                 self.crawled_urls.add(current_url)
                 self.crawled_urls.add(url)
+
+                # save current_url & file_name in metadata
+                self.metadata["successful"].append(
+                    {"url": current_url, "filename": file_path}
+                )
 
                 # find all <a> tags
                 links = page.query_selector_all("a[href]")
