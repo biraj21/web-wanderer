@@ -28,7 +28,11 @@ def get_cleaned_url(url):
     if not all([parsed_url.scheme, parsed_url.netloc]):
         return None
 
-    return f"{parsed_url.scheme}://{parsed_url.netloc}{re.sub(r'/+', '/', parsed_url.path)}"
+    url_path = re.sub(r"/+", "/", parsed_url.path)
+    if url_path.endswith("/"):
+        url_path = url_path[:-1]
+
+    return f"{parsed_url.scheme}://{parsed_url.netloc}{url_path}"
 
 
 def get_filename(url, skip_base_url=False):
