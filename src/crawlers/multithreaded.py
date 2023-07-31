@@ -5,11 +5,11 @@ import time
 
 from typing import Callable, Optional
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Response
 from playwright._impl._api_types import TimeoutError
 
 from .base import Crawler
-from utils.url import add_base_url, get_base_url, get_cleaned_url, get_filename
+from utils.url import add_base_url, get_base_url, get_cleaned_url, get_filename, is_url
 
 # number of threads for crawling
 NUM_THREADS = 8
@@ -98,24 +98,29 @@ class MultithreadedCrawler(Crawler):
                 browser = p.chromium.launch()
                 page = browser.new_page()
 
+                response = None  # main resource response i.e response of the page
                 try:
-                    response = page.goto(url)
-                    page.wait_for_load_state("networkidle", timeout=PAGE_WAIT_TIMEOUT)
+                    response = page.goto(
+                        url, wait_until="networkidle", timeout=PAGE_WAIT_TIMEOUT
+                    )
                 except TimeoutError:
                     self.logger.warning(
                         f"{current_url} timeout - using whatever's rendered"
                     )
 
-                if response.status >= 400:
-                    self.failed_urls.add(current_url)
-                    self.failed_urls.add(url)
-                    self.logger.warning(
-                        f"skipping {current_url} as response status {response.status}"
-                    )
-                    return
+                if not is_url(page.url):
+                    raise ValueError(f"invalid page url '{page.url}'")
 
                 # in case of redirects, current URL would be different from the given URL
                 current_url = get_cleaned_url(page.url)
+
+                if isinstance(response, Response) and response.status >= 400:
+                    self.failed_urls.add(current_url)
+                    self.failed_urls.add(url)
+                    self.logger.warning(
+                        f"skipping {current_url} as it responded with status {response.status}"
+                    )
+                    return
 
                 # if it is redirected, then first check if it should be crawled or not
                 if url != current_url and not self.should_crawl(current_url):
