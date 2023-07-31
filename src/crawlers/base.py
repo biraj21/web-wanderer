@@ -5,9 +5,8 @@ import sys
 
 from typing import Callable, Dict, List, Optional
 
-import validators
 
-from utils.url import get_base_url, get_cleaned_url, get_filename
+from utils.url import get_base_url, get_cleaned_url, get_filename, is_url
 
 # where to store the downloaded pages by default
 DEFAULT_OUTPUT_DIR = os.path.join("web-wanderer", "downloads")
@@ -20,7 +19,7 @@ class Crawler:
         output_dir: Optional[str] = None,
         done_callback: Optional[Callable] = None,
     ):
-        if isinstance(validators.url(seed_url), validators.ValidationFailure):
+        if not is_url(seed_url):
             raise ValueError(f"invalid seed_url '{seed_url}'")
 
         # the url to start crawling from

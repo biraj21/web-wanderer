@@ -1,6 +1,12 @@
 import re
 
+import validators
+
 from urllib.parse import urlparse, urljoin
+
+
+def is_url(s: str):
+    return not isinstance(validators.url(s), validators.ValidationFailure)
 
 
 def get_base_url(url):
