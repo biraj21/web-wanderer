@@ -5,8 +5,8 @@ import time
 
 from typing import Callable, Optional
 
-from playwright.sync_api import sync_playwright, Response
-from playwright._impl._api_types import TimeoutError
+from playwright.sync_api import sync_playwright, Response, TimeoutError
+
 
 from .base import Crawler
 from utils.url import add_base_url, get_base_url, get_cleaned_url, get_filename, is_url

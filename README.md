@@ -50,7 +50,6 @@ Web Wanderer relies on the following libraries:
 
 - `playwright`: To handle dynamically rendered websites and interact with web pages.
 
-
 ## Getting Started with Development
 
 _Note: Have only tested this project with **Python 3.11.4**._
@@ -62,10 +61,24 @@ git clone https://github.com/biraj21/web-wanderer.git
 cd web-wanderer
 ```
 
-2. Install the required dependencies:
+2. Install and setup [pipenv](https://pypi.org/project/pipenv/)
+
+3. Active virtual environment
 
 ```bash
-pip install playwright
+pipenv shell
+```
+
+4. Install dependencies
+
+```bash
+pipenv install
+```
+
+5. Install headless browser with `playwright`
+
+```bash
+playwright install
 ```
 
 Happy web crawling with Web Wanderer! 🕸️🚀

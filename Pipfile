@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-playwright = "*"
-validators = "*"
+playwright = "~=1.43"
+validators = "~=0.28"
 
 [dev-packages]
 
