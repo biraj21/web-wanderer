@@ -81,4 +81,14 @@ pipenv install
 playwright install
 ```
 
+## Planned things
+
+- `asyncio` crawler
+- `trio` crawler (cuz why not)
+- Allow choosing between HTML engine (requests/aiohttp) & JavaScript engine (Playwright)
+
+Will do it when I get time.
+
+List created on 30th Nov, 2024
+
 Happy web crawling with Web Wanderer! 🕸️🚀
