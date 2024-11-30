@@ -83,6 +83,7 @@ playwright install
 
 ## Planned things
 
+- Replace `pipenv` with `poetry` cuz `pipenv` is shit
 - `asyncio` crawler
 - `trio` crawler (cuz why not)
 - Allow choosing between HTML engine (requests/aiohttp) & JavaScript engine (Playwright)
